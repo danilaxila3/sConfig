@@ -10,12 +10,18 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  int file_new = 0;
   FILE *file;
   file = fopen(argv[1], "r");
 
   if (file == NULL) {
-    printf("\e[0mCould not open file %s\n", argv[1]);
-    return 1;
+    file = fopen(argv[1], "w+");
+    file_new = 1;
+
+    if (file == NULL) {
+      printf("\e[31m\U000f0752 \e[0mCould not open file %s\n", argv[1]);
+      return 1;
+    }
   }
 
   char entries[128][3][128];
@@ -135,29 +141,27 @@ int main(int argc, char *argv[]) {
     }
 
     if (mode == 1) {
-      attron(COLOR_PAIR(1) | A_BOLD);
-
-      for (int j = 0; j < COLS; j++) {
-        mvprintw(LINES - 2, j, "─");
-      }
-
-      attroff(COLOR_PAIR(1) | A_BOLD);
-
       for (int i = 0; i < COLS; i++) {
-        mvprintw(LINES - 1, i, " ");
+        mvprintw(LINES - 2, i, " ");
       }
 
-      mvprintw(LINES - 1, 0, "%s", input_buf);
+      mvprintw(LINES - 2, 0, "%s", input_buf);
 
       attron(A_REVERSE);
 
       if (input_buf[input_buf_cursor] == '\0') {
-        mvprintw(LINES - 1, input_buf_cursor, " ");
+        mvprintw(LINES - 2, input_buf_cursor, " ");
       } else {
-        mvprintw(LINES - 1, input_buf_cursor, "%c",
+        mvprintw(LINES - 2, input_buf_cursor, "%c",
                  input_buf[input_buf_cursor]);
       }
       attroff(A_REVERSE);
+    }
+
+    if (file_new) {
+      mvprintw(LINES - 1, 0, "sConfig: %s [New]", argv[1]);
+    } else {
+      mvprintw(LINES - 1, 0, "sConfig: %s", argv[1]);
     }
 
     int input = getch();
