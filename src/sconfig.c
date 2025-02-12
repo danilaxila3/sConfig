@@ -95,6 +95,7 @@ int main(int argc, char *argv[]) {
   int edit_mode = 0;
   char input_buf[128] = "";
   int input_buf_cursor = 0;
+  int help_message_visible = 1;
 
   while (running) {
     clear();
@@ -155,7 +156,49 @@ int main(int argc, char *argv[]) {
         mvprintw(LINES - 2, input_buf_cursor, "%c",
                  input_buf[input_buf_cursor]);
       }
+
       attroff(A_REVERSE);
+    }
+
+    if (help_message_visible) {
+      mvprintw(LINES - 1, COLS / 2, "Press h for help");
+    }
+
+    if (mode == 2) {
+      for (int i = 0; i < LINES - 4; i++) {
+        for (int j = 0; j < COLS - 8; j++) {
+          mvprintw(i + 2, j + 4, " ");
+        }
+      }
+
+      for (int i = 0; i < LINES - 4; i++) {
+        mvprintw(i + 2, 4, "│");
+        mvprintw(i + 2, COLS - 5, "│");
+      }
+
+      for (int i = 0; i < COLS - 8; i++) {
+        mvprintw(2, i + 4, "─");
+        mvprintw(LINES - 3, i + 4, "─");
+      }
+
+      mvprintw(2, 4, "┌");
+      mvprintw(2, COLS - 5, "┐");
+      mvprintw(LINES - 3, 4, "└");
+      mvprintw(LINES - 3, COLS - 5, "┘");
+
+      mvprintw(3, COLS / 2 - 4 / 2, "Help");
+
+      mvprintw(4, 6, "j, up - Move up");
+      mvprintw(5, 6, "d, down - Move down");
+      mvprintw(6, 6, "h, left - Edit key, section");
+      mvprintw(7, 6, "l, right - Edit value");
+      mvprintw(8, 6, "d - Delete entry");
+      mvprintw(9, 6, "a - Add new key");
+      mvprintw(10, 6, "A - Add new section");
+      mvprintw(11, 6, "h - Open help");
+      mvprintw(12, 6, "q - Write to file and quit");
+
+      mvprintw(LINES - 4, COLS / 2 - 15 / 2, "Press q to quit");
     }
 
     if (file_new) {
@@ -165,6 +208,8 @@ int main(int argc, char *argv[]) {
     }
 
     int input = getch();
+
+    help_message_visible = 0;
 
     if (mode == 0) {
       if (input == 'q') {
@@ -229,7 +274,12 @@ int main(int argc, char *argv[]) {
           strcpy(entries[i][1], entries[i + 1][1]);
           strcpy(entries[i][2], entries[i + 1][2]);
         }
+
         entries_num--;
+      }
+
+      if (input == 'h') {
+        mode = 2;
       }
     } else if (mode == 1) {
       if (input >= 32 && input <= 128) {
@@ -277,6 +327,10 @@ int main(int argc, char *argv[]) {
           strcpy(entries[entries_num][1], input_buf);
           entries_num++;
         }
+      }
+    } else if (mode == 2) {
+      if (input == 'q') {
+        mode = 0;
       }
     }
   }
